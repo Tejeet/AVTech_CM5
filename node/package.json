@@ -1,0 +1,20 @@
+{
+  "name": "fullstack-app",
+  "version": "1.0.0",
+  "description": "A fullstack Node.js application using Fastify, Redis, SQLite and Aedes MQTT broker.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "aedes": "^0.43.0",
+    "fastify": "^4.0.0",
+    "redis": "^4.0.0",
+    "sqlite3": "^5.1.6"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "author": "Tejeet",
+  "license": "MIT"
+}
