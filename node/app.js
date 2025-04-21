@@ -4,7 +4,7 @@ const db = require('./db'); // Import the DB module
 
 // Redis setup
 const client = redis.createClient({
-  url: 'redis://localhost:6380'
+  url: 'redis://localhost:6379'
 });
 
 client.connect()
