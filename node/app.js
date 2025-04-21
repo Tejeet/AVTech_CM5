@@ -1,21 +1,10 @@
 const fastify = require('fastify')();
 const redis = require('redis');
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const db = require('./db'); // Import the DB module
 
-// Setup SQLite DB
-const dbPath = path.join(__dirname, 'data.db');
-const db = new sqlite3.Database(dbPath);
-
-db.run(`CREATE TABLE IF NOT EXISTS logs (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  data TEXT,
-  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-)`);
-
-// Connect to Redis
+// Redis setup
 const client = redis.createClient({
-  url: 'redis://localhost:6379'
+  url: 'redis://localhost:6380'
 });
 
 client.connect()
@@ -25,7 +14,7 @@ client.connect()
     process.exit(1);
   });
 
-// Redis-powered homepage
+// Homepage with Redis visit count
 fastify.get('/', async (request, reply) => {
   try {
     const count = await client.incr('visit_count');
@@ -36,13 +25,13 @@ fastify.get('/', async (request, reply) => {
   }
 });
 
-// Dummy API function
+// Simulated API function
 async function testApi(imageData) {
   console.log('📡 Simulating API call...');
   return { status: 'success', message: 'API call simulated' };
 }
 
-// POST /upload/record
+// POST /upload/record route
 fastify.post('/upload/record', async (req, reply) => {
   const body = req.body;
 
