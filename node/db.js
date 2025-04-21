@@ -1,26 +1,33 @@
 // db.js
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const mysql = require('mysql2');
 
-// NOTE: In production, you might want to load credentials from env variables
-const DB_PATH = path.join(__dirname, 'data.db');
+// Use environment variables or config file in production
+const DB_CONFIG = {
+  host: '94.136.185.134',
+  port: 3306,
+  user: 'root',
+  password: 'myroot',
+  database: 'amityfacecam'
+};
 
-// Initialize connection
-const db = new sqlite3.Database(DB_PATH, (err) => {
+// Create a connection pool for better performance
+const pool = mysql.createPool(DB_CONFIG);
+
+// Create `logs` table if not exists
+const createTableSQL = `
+  CREATE TABLE IF NOT EXISTS logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    data JSON,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`;
+
+pool.query(createTableSQL, (err, results) => {
   if (err) {
-    console.error('❌ Failed to connect to SQLite:', err.message);
+    console.error('❌ Failed to create or verify logs table:', err.message);
   } else {
-    console.log('✅ Connected to SQLite DB');
+    console.log('✅ MySQL logs table ready');
   }
 });
 
-// Create `logs` table if not exists
-db.run(`
-  CREATE TABLE IF NOT EXISTS logs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    data TEXT,
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
-
-module.exports = db;
+module.exports = pool.promise(); // Use promise-based API

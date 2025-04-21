@@ -1,6 +1,6 @@
 const fastify = require('fastify')();
 const redis = require('redis');
-const db = require('./db'); // Import the DB module
+const db = require('./db'); // MySQL DB connection
 
 // Redis setup
 const client = redis.createClient({
@@ -25,15 +25,25 @@ fastify.get('/', async (request, reply) => {
   }
 });
 
-// Simulated API function
+// Simulated API call
 async function testApi(imageData) {
   console.log('📡 Simulating API call...');
   return { status: 'success', message: 'API call simulated' };
 }
 
-// POST /upload/record route
+// POST /upload/record
 fastify.post('/upload/record', async (req, reply) => {
   const body = req.body;
+
+  // Log full request body
+  const logData = JSON.stringify(body);
+  db.query(`INSERT INTO logs (data) VALUES (?)`, [logData], (err, result) => {
+    if (err) {
+      console.error('❌ Failed to log request:', err);
+    } else {
+      console.log(`📥 Logged request with ID ${result.insertId}`);
+    }
+  });
 
   if (body.cmd && body.cmd === 'face') {
     const result = {
@@ -50,19 +60,9 @@ fastify.post('/upload/record', async (req, reply) => {
       }
     };
 
-    const jsonString = JSON.stringify(result);
-
-    db.run(`INSERT INTO logs (data) VALUES (?)`, [jsonString], function (err) {
-      if (err) {
-        console.error('❌ DB Insert Error:', err);
-      } else {
-        console.log(`✅ Logged result with ID ${this.lastID}`);
-      }
-    });
-
     reply.send(result);
 
-    if (body.closeup_pic && body.closeup_pic.data) {
+    if (body.closeup_pic?.data) {
       const apiResult = await testApi(body.closeup_pic.data);
       console.log("✅ API Result:", apiResult);
     }
